@@ -1,0 +1,16 @@
+# GRIK paper-submission environment.
+# Tested on transformers 4.45.2; works on 4.40-4.45 range.
+torch>=2.1
+transformers>=4.40,<4.46
+tokenizers>=0.20
+datasets>=2.14
+numpy>=1.24
+tqdm>=4.65
+# LongBench scoring deps
+jieba
+fuzzywuzzy
+rouge
+nltk
+# Optional: NIAH-style heatmap and pareto plots
+matplotlib>=3.7
+pandas>=2.0

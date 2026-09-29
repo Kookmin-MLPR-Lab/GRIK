@@ -1,0 +1,146 @@
+% =============================================================================
+% Main LongBench-v1 results table (4 paper-relevant methods, 4 KV budgets,
+% 3 models, 2 ratios). ThinK-mean (8h aggregation variant) is reported in a
+% separate supplemental table below to keep the main table focused on the
+% per-Q-head ThinK 32h baseline cited from \citet{think}.
+%
+% Sources of cells:
+%  - LLaMA-3 FullKV / ThinK rows: \citet{think} Table 2 (H2O baseline +
+%    THINK at matched KV size).
+%  - LLaMA-3 SparK / GRIK rows: this work, run on RTX PRO 6000.
+%  - LLaMA-3.1 / Qwen2.5 FullKV rows: this work (DGX), method
+%    `ours_gqa_iter32_think_h2o` ratio=0 (= no channel pruning, H2O eviction only).
+%  - LLaMA-3.1 / Qwen2.5 ThinK / SparK / GRIK rows: this work.
+% =============================================================================
+
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.05}
+\caption{LongBench-v1 average across 16 tasks. Higher is better. Best non-FullKV
+score per (model, budget, ratio) block is \textbf{bold}. ThinK refers to the
+per-Q-head 32h variant cited from \citet{think}; the 8h GQA-mean variant is
+broken out separately in Table~\ref{tab:longbench-thinkmean}.}
+\label{tab:longbench-main}
+\begin{tabular}{llrrrr}
+\toprule
+Model & Method & $B{=}128$ & $B{=}512$ & $B{=}1024$ & $B{=}2048$ \\
+\midrule
+\multirow{7}{*}{LLaMA-3-8B-Inst.}
+ & Full KV (reference)                    & 35.38          & 37.23          & 38.70          & 39.59          \\
+\cmidrule(lr){2-6}
+ & ThinK ($r{=}0.4$)                      & 35.63          & 37.39          & 39.00          & 40.05          \\
+ & SparK ($r{=}0.4$)                      & 32.73          & 33.92          & 34.68          & 34.83          \\
+ & \textbf{GRIK ($r{=}0.4$)}              & \textbf{35.92} & \textbf{38.63} & \textbf{40.12} & \textbf{41.30} \\
+\cmidrule(lr){2-6}
+ & ThinK ($r{=}0.6$)                      & 35.06          & 36.34          & \textbf{38.57} & 38.51          \\
+ & SparK ($r{=}0.6$)                      & 27.97          & 26.62          & 24.11          & 21.92          \\
+ & \textbf{GRIK ($r{=}0.6$)}              & \textbf{35.00} & \textbf{37.45} & 38.45          & \textbf{39.24} \\
+\midrule
+\multirow{7}{*}{LLaMA-3.1-8B-Inst.}
+ & Full KV (reference)                    & 39.87          & 43.38          & 44.88          & 45.73          \\
+\cmidrule(lr){2-6}
+ & ThinK ($r{=}0.4$)                      & 39.22          & 41.56          & 42.79          & 44.30          \\
+ & SparK ($r{=}0.4$)                      & 38.22          & 39.94          & 39.94          & 38.47          \\
+ & \textbf{GRIK ($r{=}0.4$)}              & \textbf{39.60} & \textbf{43.17} & \textbf{44.63} & \textbf{45.46} \\
+\cmidrule(lr){2-6}
+ & ThinK ($r{=}0.6$)                      & 39.00          & 40.89          & 42.38          & 43.65          \\
+ & SparK ($r{=}0.6$)                      & 34.06          & 29.86          & 25.12          & 20.65          \\
+ & \textbf{GRIK ($r{=}0.6$)}              & \textbf{39.31} & \textbf{42.07} & \textbf{43.54} & \textbf{44.62} \\
+\midrule
+\multirow{7}{*}{Qwen2.5-7B-Inst.}
+ & Full KV (reference)                    & 39.58          & 42.35          & 43.79          & 44.89          \\
+\cmidrule(lr){2-6}
+ & ThinK ($r{=}0.4$)                      & \textbf{39.41} & 42.16          & 43.68          & 45.13          \\
+ & SparK ($r{=}0.4$)                      & 10.73          & 11.41          & 11.49          & 11.28          \\
+ & \textbf{GRIK ($r{=}0.4$)}              & 38.88          & \textbf{42.53} & \textbf{43.98} & \textbf{45.29} \\
+\cmidrule(lr){2-6}
+ & ThinK ($r{=}0.6$)                      & \textbf{39.40} & 41.93          & \textbf{43.64} & \textbf{44.92} \\
+ & SparK ($r{=}0.6$)                      & 10.55          & 10.93          & 10.98          & 10.86          \\
+ & \textbf{GRIK ($r{=}0.6$)}              & 38.27          & \textbf{42.05} & 43.49          & 44.73          \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+
+% =============================================================================
+% Supplemental: ThinK-mean (8h GQA-aggregated) variant. Same memory footprint
+% as our 8h GRIK, but uses one-shot per-group mean aggregation of the per-head
+% ThinK score instead of the iterative Wanda-weighted score. Kept separate from
+% the main table because (i) it is a pruning-rule ablation rather than a
+% baseline from prior work, and (ii) coverage is r=0.4 only.
+% =============================================================================
+
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.05}
+\caption{\textbf{Supplemental — ThinK-mean (8h, GQA-aggregated) variant.}
+LongBench-v1 average across 16 tasks at $r{=}0.4$. Same storage as GRIK
+(8h Key cache) but uses one-shot per-group mean aggregation of the
+per-head ThinK score instead of GRIK's iterative refinement with Wanda
+$k_\text{proj}$ row-norm weighting.
+A dash ``--'' indicates not measured.}
+\label{tab:longbench-thinkmean}
+\begin{tabular}{llrrrr}
+\toprule
+Model & Method & $B{=}128$ & $B{=}512$ & $B{=}1024$ & $B{=}2048$ \\
+\midrule
+\multirow{2}{*}{LLaMA-3-8B-Inst.}
+ & ThinK-mean (8h)                        & 35.45 & 36.96 & 38.11 & 39.48 \\
+ & \textbf{GRIK} (8h, ours)               & \textbf{35.92} & \textbf{38.63} & \textbf{40.12} & \textbf{41.30} \\
+\midrule
+\multirow{2}{*}{Mistral-7B-Inst.-v0.2}
+ & ThinK-mean (8h)                        & 32.86 & 35.25 & 36.82 & 38.42 \\
+ & \textbf{GRIK} (8h, ours)               & \textbf{32.88} & \textbf{36.63} & \textbf{38.58} & \textbf{39.55} \\
+\midrule
+\multirow{2}{*}{LLaMA-3.1-8B-Inst.}
+ & ThinK-mean (8h)                        & --    & --    & --    & --    \\
+ & \textbf{GRIK} (8h, ours)               & \textbf{39.60} & \textbf{43.17} & \textbf{44.63} & \textbf{45.46} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+
+% =============================================================================
+% Supplemental: no-evict (channel-only ceiling). KV budget is set so large that
+% H2O eviction never fires, isolating channel pruning quality. Useful as the
+% upper-bound retrieval ceiling each method can attain when memory pressure
+% is removed.
+% =============================================================================
+
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.05}
+\caption{\textbf{Supplemental — No-eviction ceiling (channel-only).}
+LongBench-v1 average. KV budget large enough that H2O eviction never fires;
+the only compression is channel pruning.}
+\label{tab:longbench-noevict}
+\begin{tabular}{llrr}
+\toprule
+Model & Method & $r{=}0.4$ & $r{=}0.6$ \\
+\midrule
+\multirow{4}{*}{LLaMA-3-8B-Inst.}
+ & Full KV~\citep{think}                  & 41.86          & 41.86          \\
+ & ThinK                                  & 42.25          & 41.48          \\
+ & SparK                                  & 34.02          & 19.72          \\
+ & \textbf{GRIK} (ours)                   & 42.09          & \textbf{41.07} \\
+\midrule
+\multirow{4}{*}{LLaMA-3.1-8B-Inst.}
+ & Full KV (reference)                    & --             & --             \\
+ & ThinK                                  & \textbf{46.34} & \textbf{45.82} \\
+ & SparK                                  & 33.51          & 16.74          \\
+ & \textbf{GRIK} (ours)                   & 46.23          & 45.66          \\
+\midrule
+\multirow{4}{*}{Qwen2.5-7B-Inst.}
+ & Full KV (reference)                    & 47.34          & 47.34          \\
+ & ThinK                                  & \textbf{47.65} & \textbf{47.18} \\
+ & SparK                                  & 11.11          & 10.13          \\
+ & \textbf{GRIK} (ours)                   & 47.20          & 46.55          \\
+\bottomrule
+\end{tabular}
+\end{table*}

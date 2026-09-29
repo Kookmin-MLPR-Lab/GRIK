@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Model weights & datasets
+.models/
+data/LongBench/
+data/RULER/
+*.safetensors
+*.bin
+
+# Run outputs
+results/
+*.log
+*.pid
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Paper compile artifacts
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.pdf
+!paper/figs/*.pdf
